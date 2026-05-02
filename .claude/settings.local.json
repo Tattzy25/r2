@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /s /b c:\\\\Users\\\\brand\\\\Downloads\\\\r2r2)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\brand\\\\Downloads\\\\r2r2\" -Recurse -File | Select-Object FullName | ForEach-Object { $_.FullName })",
+      "Bash(npm install *)",
+      "Bash(pnpm install *)",
+      "Bash(Remove-Item src\\\\batchFile.ts, src\\\\R2client.ts, src\\\\singleFile.ts)",
+      "Bash(pnpm run *)",
+      "PowerShell(Get-ChildItem \"c:\\\\Users\\\\brand\\\\Downloads\\\\r2r2\\\\dist\" -ErrorAction SilentlyContinue; if \\(-not \\(Test-Path \"c:\\\\Users\\\\brand\\\\Downloads\\\\r2r2\\\\dist\"\\)\\) { Write-Host \"dist does not exist\" })"
+    ]
+  }
+}
