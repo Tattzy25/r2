@@ -113,8 +113,7 @@ GET URL (action="download"):
         data: z.string().optional().describe("Base64-encoded file contents (upload only)"),
         content_type: z.string().optional().describe('MIME type (upload only), e.g. "image/png"'),
         cache_control: z.string().optional().describe('Cache-Control header (upload only), e.g. "public, max-age=31536000, immutable"'),
-      })
-      .strict(),
+      }),
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
   async ({ action, key, data, content_type, cache_control }) => {
@@ -131,7 +130,7 @@ GET URL (action="download"):
 
     return {
       content: [{ type: "text" as const, text: JSON.stringify(output, null, 2) }],
-      structuredContent: output,
+      structuredContent: output as Record<string, unknown>,
     };
   },
 );
@@ -165,8 +164,7 @@ BATCH GET URL (action="download"):
           .min(1)
           .max(100),
         concurrency: z.number().int().min(1).max(10).default(5),
-      })
-      .strict(),
+      }),
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
   async ({ action, files, concurrency }) => {
@@ -179,10 +177,10 @@ BATCH GET URL (action="download"):
 
     if (action === "download") {
       const cfg = getConfig();
-      results = files.map((f) => ({ key: f.key, url: publicUrl(cfg, f.key) }));
+      results = files.map((f: { key: string; data?: string; content_type?: string; cache_control?: string }) => ({ key: f.key, url: publicUrl(cfg, f.key) }));
     } else {
       const tasks = files.map(
-        (file) => async (): Promise<FileResult> => {
+        (file: { key: string; data?: string; content_type?: string; cache_control?: string }) => async (): Promise<FileResult> => {
           try {
             if (!file.data) throw new Error(`"data" is required for upload (key: "${file.key}")`);
             if (!file.content_type) throw new Error(`"content_type" is required for upload (key: "${file.key}")`);
@@ -204,7 +202,7 @@ BATCH GET URL (action="download"):
 
     return {
       content: [{ type: "text" as const, text: JSON.stringify(summary, null, 2) }],
-      structuredContent: summary,
+      structuredContent: summary as Record<string, unknown>,
     };
   },
 );
