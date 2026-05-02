@@ -59,7 +59,7 @@ async function uploadFile(
   const res = await makeClient(cfg).fetch(storageEndpoint(cfg, key), {
     method: "PUT",
     headers,
-    body: data,
+    body: new Uint8Array(data.buffer, data.byteOffset, data.byteLength),
   });
 
   if (!res.ok) {
@@ -92,6 +92,7 @@ async function runWithConcurrency<T>(
 
 const server = new McpServer({ name: "r2-mcp-server", version: "1.0.0" });
 
+// @ts-expect-error - registerTool type inference too deep with zod@3.25 + @modelcontextprotocol/sdk@1.29
 server.registerTool(
   "r2_file",
   {
@@ -116,7 +117,7 @@ GET URL (action="download"):
       }),
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
-  async ({ action, key, data, content_type, cache_control }) => {
+  async ({ action, key, data, content_type, cache_control }: { action: "upload" | "download"; key: string; data?: string; content_type?: string; cache_control?: string }) => {
     let output: object;
 
     if (action === "upload") {
@@ -135,6 +136,7 @@ GET URL (action="download"):
   },
 );
 
+// @ts-expect-error - registerTool type inference too deep with zod@3.25 + @modelcontextprotocol/sdk@1.29
 server.registerTool(
   "r2_batch",
   {
@@ -167,7 +169,7 @@ BATCH GET URL (action="download"):
       }),
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
-  async ({ action, files, concurrency }) => {
+  async ({ action, files, concurrency }: { action: "upload" | "download"; files: Array<{ key: string; data?: string; content_type?: string; cache_control?: string }>; concurrency: number }) => {
     type UploadResult = { key: string; url: string; size: number; content_type: string };
     type UrlResult = { key: string; url: string };
     type ErrorResult = { key: string; error: string };
